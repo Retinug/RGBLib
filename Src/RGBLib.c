@@ -6,12 +6,36 @@ uint32_t channelData;
 volatile uint8_t RGB_BUFFER[RGB_NUM * 3] = {0, };
 volatile uint8_t PWM_BUFFER[RGB_NUM * 24] = {0, };
 
+volatile TYPE_RGB_STATUS RGB_STATUS;
+
 void RGB_Init(TIM_HandleTypeDef *timData, uint32_t channel, TIM_HandleTypeDef *timRate)
 {
   timerData = timData;
   channelData = channel;
   timerRate = timRate;
 }
+
+void RGB_FinishedCallback(void)
+{
+  HAL_TIM_PWM_Stop_DMA(timerData, channelData);
+  RGB_STATUS = RGB_WAIT;
+}
+
+void RGB_WaitStatus(TYPE_RGB_STATUS status)
+{
+  while (RGB_GetStatus() != status);
+}
+
+TYPE_RGB_STATUS RGB_GetStatus(void)
+{
+  return RGB_STATUS;
+}
+
+void RGB_SetStatus(TYPE_RGB_STATUS status)
+{
+  RGB_STATUS = status;
+}
+
 void RGB_FillPixelRGB(uint16_t num, uint8_t red, uint8_t green, uint8_t blue)
 {
   RGB_BUFFER[3 * num] = green;
@@ -42,6 +66,8 @@ void RGB_Send(void)
     }
   }
   HAL_TIM_PWM_Start_DMA(timerData, channelData, (uint32_t*) PWM_BUFFER, RGB_NUM * 24);
+  RGB_STATUS = RGB_TRANSMIT;
+}
 
 void RGB_HSVtoRGB(uint8_t hue, uint8_t sat, uint8_t val, uint8_t *red, uint8_t *green, uint8_t *blue)
 {
