@@ -19,6 +19,13 @@ void RGB_FillPixelRGB(uint16_t num, uint8_t red, uint8_t green, uint8_t blue)
   RGB_BUFFER[3 * num + 2] = blue;
 }
 
+void RGB_FillPixelHSV(uint16_t num, uint8_t hue, uint8_t sat, uint8_t val)
+{
+  uint8_t r, g, b;
+  RGB_HSVtoRGB(hue, sat, val, &r, &g, &b);
+  RGB_FillPixelRGB(num, r, g, b);
+}
+
 void RGB_Send(void)
 {
   uint32_t indx = 0;
@@ -35,4 +42,38 @@ void RGB_Send(void)
     }
   }
   HAL_TIM_PWM_Start_DMA(timerData, channelData, (uint32_t*) PWM_BUFFER, RGB_NUM * 24);
+
+void RGB_HSVtoRGB(uint8_t hue, uint8_t sat, uint8_t val, uint8_t *red, uint8_t *green, uint8_t *blue)
+{
+  float h = (float) hue / 255;
+  float s = (float) sat / 255;
+  float v = (float) val / 255;
+
+  int i = (int) floorf(h * 6);
+  float f = h * 6 - (float) i;
+  uint8_t p = (uint8_t) (v * (1.0 - s) * 255.0);
+  uint8_t q = (uint8_t) (v * (1.0 - f * s) * 255.0);
+  uint8_t t = (uint8_t) (v * (1.0 - (1.0 - f) * s) * 255.0);
+
+  switch (i % 6)
+  {
+    case 0:
+      *red = val, *green = t, *blue = p;
+      break;
+    case 1:
+      *red = q, *green = val, *blue = p;
+      break;
+    case 2:
+      *red = p, *green = val, *blue = t;
+      break;
+    case 3:
+      *red = p, *green = q, *blue = val;
+      break;
+    case 4:
+      *red = t, *green = p, *blue = val;
+      break;
+    default:
+      *red = val, *green = p, *blue = q;
+      break;
+  }
 }
