@@ -9,6 +9,7 @@
 
 #define FX_MODE_OFF 0
 #define FX_MODE_STATIC 1
+#define FX_MODE_RAINBOW 2
 
 typedef struct TYPE_FX_SEGMENT
 {
@@ -26,7 +27,6 @@ typedef struct TYPE_FX_SEGMENT_MANAGER
   FX_Segment segments[SEGMENT_SIZEMAX];
 } FX_Segment_Manager;
 
-
 void FX_Update(void);
 
 void FX_SetSegment(uint8_t num, uint16_t start, uint16_t end, uint8_t mode, uint8_t counterTarget, uint8_t hue);
@@ -35,4 +35,6 @@ void FX_SegmentUpdate(FX_Segment *segment);
 
 void FX_Off(FX_Segment *segment);
 void FX_Static(FX_Segment *segment);
+void FX_Rainbow(FX_Segment *segment);
+
 #endif
